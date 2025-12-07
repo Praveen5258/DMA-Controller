@@ -1,89 +1,88 @@
-🚀 DMA Controller – AXI-Lite Based Data Transfer Engine
+# 📦✨ DMA Controller – AXI-Lite Data Transfer Engine
 
-The DMA Controller is a Verilog-based hardware module designed to transfer a specified number of bytes from a source address to a destination address using the AXI-Lite protocol.
-It supports unaligned transfers, byte-accurate writes, and uses a FIFO buffer to smoothly handle read–write timing differences.
+The **DMA Controller** is a Verilog-based hardware module designed to move data efficiently from a **source address** to a **destination address** using the AXI-Lite protocol.  
+It supports **unaligned transfers**, **byte-level strobes**, and uses a **FIFO buffer** to keep reads and writes flowing smoothly.
 
-This project is great for understanding how real hardware DMAs operate internally, covering concepts like FSMs, strobes, alignment, buffering, and AXI handshakes.
+This project is ideal for anyone learning about hardware datapaths, AXI handshakes, or real DMA architecture inside processors and SoCs.
 
-🌟 Features
+---
 
-⚙️ AXI-Lite Interface – Supports AR/AW/W/B/R channel handshakes.
+## 🌟 Features (Stickers Included)
 
-📦 FIFO Buffering – 16×32-bit synchronous FIFO for storing read data.
+- ⚙️ **AXI-Lite Read/Write Support**  
+- 🧩 **Handles Unaligned Addresses** (source + destination)  
+- ✂️ **Smart WSTRB Generation** for partial writes  
+- 📥 **16×32-bit FIFO Buffer**  
+- 🔄 **Dual FSM Design** (Read FSM + Write FSM)  
+- 📏 **Accurate Byte Counting**  
+- 🎉 **`done` Signal When Transfer Completes**  
+- 🔍 Built-in alignment logic using shifting + masking  
 
-🎯 Unaligned Transfer Support – Works with any source/destination byte offset.
+---
 
-✂️ Automatic WSTRB Generation – Handles partial writes and leftover bytes.
+## 📁 Modules Included
 
-🔄 Dual FSM Architecture – Independent Read and Write state machines.
+### **1️⃣ dma_controller.v**  
+🛠 Handles the main DMA pipeline:
 
-📏 Byte-Accurate Transfer Logic – Computes exact number of required reads.
+- Issues AXI read requests  
+- Aligns incoming read data  
+- Pushes aligned data into FIFO  
+- Fetches data from FIFO for writing  
+- Aligns data for destination address  
+- Generates correct `WSTRB` for all cases  
+- Tracks progress and asserts `done`  
 
-✔️ done Signal – Indicates when the DMA operation finishes successfully.
+---
 
-📁 Modules Included
-1️⃣ dma_controller.v
+### **2️⃣ sync_fifo.v**  
+📦 A simple synchronous FIFO used to buffer read data.
 
-Implements the full DMA pipeline:
+- 16 entries × 32 bits  
+- FULL / EMPTY indicators  
+- Supports simultaneous read + write  
+- Internal memory taps exposed for debugging (mem0–mem7)  
 
-Read FSM:
+---
 
-Issues AXI read transactions
+## 🚀 How It Works (High-Level)
 
-Aligns data based on source offset
+1. User pulses **trigger** to start DMA  
+2. Controller reads byte offsets from source & destination addresses  
+3. **Read FSM** begins:
+   - Sends AR request  
+   - Receives data via R channel  
+   - Aligns data using shifts  
+   - Writes aligned data into FIFO  
 
-Handles last partial word using shifting
+4. **Write FSM** starts:
+   - Pulls FIFO data  
+   - Re-aligns for destination offset  
+   - Generates correct WSTRB patterns  
+   - Performs AW/W/B handshakes  
 
-Pushes data into FIFO
+5. When all bytes are written, the controller raises **`done`**  
 
-Write FSM:
+---
 
-Fetches FIFO data
+## 🧪 Good For
 
-Aligns output to destination offset
+- Students learning AXI protocols  
+- FPGA designers building memory subsystems  
+- Anyone exploring DMA architecture  
+- Testbench + simulation practice  
 
-Generates correct WSTRB patterns
+---
 
-Handles write address, data, and response channels
+## 🎯 Notes
 
-2️⃣ sync_fifo.v
+- All logic is synchronous  
+- Works with AXI-Lite (32-bit data width)  
+- Read and write operations run independently thanks to FIFO decoupling  
 
-A fully synchronous FIFO used to store intermediate 32-bit data.
+---
 
-16-entry depth
+<img width="1920" height="1080" alt="Screenshot (156)" src="https://github.com/user-attachments/assets/c067d602-b642-4b9c-a827-5f6e4a39568b" />
+<img width="1920" height="1080" alt="Screenshot (138)" src="https://github.com/user-attachments/assets/286354bd-1fe2-4291-88c6-df0441fd4ee8" />
 
-FULL/EMPTY detection
-
-Supports simultaneous read/write
-
-Exposes memory taps (mem0–mem7) for debugging
-
-▶️ How It Works (High-Level)
-
-User asserts trigger to start DMA
-
-Module captures byte offsets from source/destination addresses
-
-Read FSM:
-
-Reads words from the source
-
-Aligns data correctly
-
-Writes them into FIFO
-
-Write FSM:
-
-Pulls words from FIFO
-
-Aligns data to destination
-
-Applies correct WSTRB for partial writes
-
-Writes data to the destination address
-
-done goes HIGH when the complete length of bytes has been transferred
-
-🎥 Demo (Optional)
-
-You can add waveform screenshots or simulation output here later:
+  
